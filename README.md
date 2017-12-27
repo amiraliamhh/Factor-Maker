@@ -1,5 +1,5 @@
 # Factor-maker
-Clone this repository
+Clone this repository <br>
 Run ```npm install``` <br>
 Then run ```npm start``` <br>
 Go to ```http://localhost:3000``` <br>
