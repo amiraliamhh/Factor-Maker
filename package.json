@@ -1,0 +1,21 @@
+{
+  "name": "img2pdf",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.18.2",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "ejs": "~2.5.7",
+    "express": "~4.15.5",
+    "google-maps-image-api": "^1.0.3",
+    "jimp": "^0.2.28",
+    "morgan": "~1.9.0",
+    "pdfkit": "^0.8.3",
+    "request": "^2.83.0",
+    "serve-favicon": "~2.4.5"
+  }
+}
