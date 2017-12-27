@@ -15,6 +15,8 @@
     "jimp": "^0.2.28",
     "morgan": "~1.9.0",
     "pdfkit": "^0.8.3",
+    "qr-image": "^3.2.0",
+    "qrcode": "^1.0.0",
     "request": "^2.83.0",
     "serve-favicon": "~2.4.5"
   }
