@@ -10,14 +10,10 @@ var jimp = require('jimp');
 var locImg = require('google-maps-image-api');
 var qrImage = require('qr-image');
 var qrcode = require('qrcode');
-var mmmagic = require('mmmagic').Magic;
-var path = require('path');
-var pdf2img = require('pdf2img');
+var request = require('request');
 
 var pdfDocBeforeAddingQRCode = new PDFDocument;
 var pdfDocAfterAddingQRCode = new PDFDocument;
-
-var magic = new mmmagic();
 
 var filename = Date.now();
 var pathToOriginalImage = "./assets/Factor-empty.jpg";
@@ -41,25 +37,11 @@ var constants = {
   endingDateH: 1920
 }
 
-pdf2img.setOptions({
-  type: 'png',                                // png or jpg, default jpg 
-  size: 1024,                                 // default 1024 
-  density: 600,                               // default 600 
-  outputdir: './assets', // output folder, default null (if null given, then it will create folder name same as file name) 
-  outputname: 'qrcode',                         // output file name, dafault null (if null given, then it will create image name same as input name) 
-  page: null                                  // convert selected page, default null (if null given, then it will convert all pages) 
-});
-
-// var qr_svg = qrImage.image('fuck', {type: 'png'});
-// qr_svg.pipe(fs.createWriteStream("./assets/fuck.png"))
-
-
-
 jimp.read(pathToOriginalImage, function(err, factor) {
   if (err) throw err;
   jimp.loadFont(jimp.FONT_SANS_32_BLACK).then(function(font) {
     factor.print(font, constants.eyeTicketCodeW, constants.eyeTicketCodeH, "1235")
-          .print(font, constants.customerW, constants.customerH, "Customer")
+          .print(font, constants.customerW, constants.customerH, "امیرعلی")
           .print(font, constants.titleW, constants.titleH, "Title")
           .print(font, constants.phoneNumberW, constants.phoneNumberH, "phoneNumber")
           .print(font, constants.addressW, constants.addressH, "address")
@@ -87,35 +69,21 @@ jimp.read(pathToOriginalImage, function(err, factor) {
             })
           })
           })
+          .catch(function(error) {
+            console.log("Error accured: " + error)
+          })
   })
-  // .then(function () {
-  //     //   qrcode.toDataURL('http://techter.pw', { version: 2 }, function (err, url) {
-  //     //     if (err) throw err;
-  //     //     console.log(url);
-  //     //     qrcode.toFile(generatePathToPNG(filename), "url", {
-  //     //       color: {
-  //     //         dark: '#00F',  // Blue dots
-  //     //         light: '#0000' // Transparent background
-  //     //       }
-  //     //     }, function (err) {
-  //     //       if (err) throw err
-  //     //       console.log('done')
-  //     //     })
-  //     //   })
-  //     // })
-  //     // .then(function () {
-  //     //   pdfDocBeforeAddingQRCode.pipe(fs.createWriteStream(generatePathToPDF(filename)));
-  //     //   pdfDocBeforeAddingQRCode.image(generatePathToImage(filename), 0, 0, {width: 500});
-  //     //   pdfDocBeforeAddingQRCode.image("./assets/1514558961080.png", 200, 200, {width: 500});
-  //     //   pdfDocBeforeAddingQRCode.end();
-  //     // })
-  //     // .catch(function (error) {
-  //     //   console.log("Error accured 1: " + error);
-  //     // })
-  // })
   .catch(function (error) {
     console.log("Error accured 2: " + error);
   })
+
+var googleAPIURL = "https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=13&size=600x300&maptype=roadmap&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318&markers=color:red%7Clabel:C%7C40.718217,-73.998284&key=AIzaSyA_FBq_ZWTqLh-PYTZkXAsNKdj2Gtky030";
+
+request(googleAPIURL, function (err, res, body) {
+  if (err) throw err;
+  console.log(res);
+  console.log(body);
+})
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -175,20 +143,5 @@ function generatePathToQRCodeImage(filename) {
   return path;
 }
 
-function addImageToImage(lat, long, width, filename, pdfkitInstance) {
-  return new promise(function (resolve, reject) {
-    try {
-      pdfkitInstance.pipe(fs.createWriteStream(generatePathToPDF(filename)));
-      pdfkitInstance.image(generatePathToImage(filename) , lat, long, {width: width});
-      pdfkitInstance.end();
-      var image = {
-        name: generatePathToImage(Date.now())
-      }
-      resolve(image);
-    } catch (err) {
-      reject(err);
-    }    
-  });
-}
-
 module.exports = app;
+
