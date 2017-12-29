@@ -7,9 +7,20 @@ var bodyParser = require('body-parser');
 var PDFDocument = require('pdfkit');
 var fs = require('fs');
 var jimp = require('jimp');
-var doc = new PDFDocument;
 var locImg = require('google-maps-image-api');
-var conf = require('./config');
+var qrImage = require('qr-image');
+var qrcode = require('qrcode');
+var mmmagic = require('mmmagic').Magic;
+var path = require('path');
+var pdf2img = require('pdf2img');
+
+var pdfDocBeforeAddingQRCode = new PDFDocument;
+var pdfDocAfterAddingQRCode = new PDFDocument;
+
+var magic = new mmmagic();
+
+var filename = Date.now();
+var pathToOriginalImage = "./assets/Factor-empty.jpg";
 
 var constants = {
   eyeTicketCodeW: 700,
@@ -30,9 +41,21 @@ var constants = {
   endingDateH: 1920
 }
 
-var filename = Date.now();
+pdf2img.setOptions({
+  type: 'png',                                // png or jpg, default jpg 
+  size: 1024,                                 // default 1024 
+  density: 600,                               // default 600 
+  outputdir: './assets', // output folder, default null (if null given, then it will create folder name same as file name) 
+  outputname: 'qrcode',                         // output file name, dafault null (if null given, then it will create image name same as input name) 
+  page: null                                  // convert selected page, default null (if null given, then it will convert all pages) 
+});
 
-jimp.read("./asset/Factor-empty.jpg", function(err, factor) {
+// var qr_svg = qrImage.image('fuck', {type: 'png'});
+// qr_svg.pipe(fs.createWriteStream("./assets/fuck.png"))
+
+
+
+jimp.read(pathToOriginalImage, function(err, factor) {
   if (err) throw err;
   jimp.loadFont(jimp.FONT_SANS_32_BLACK).then(function(font) {
     factor.print(font, constants.eyeTicketCodeW, constants.eyeTicketCodeH, "1235")
@@ -43,21 +66,56 @@ jimp.read("./asset/Factor-empty.jpg", function(err, factor) {
           .print(font, constants.dateW, constants.dateH, "date")
           .print(font, constants.startingDateW, constants.startingDateH, "starting date")
           .print(font, constants.endingDateW, constants.endingDateH, "ending date")
-          .write("./asset/" + filename + ".jpeg", function() {
-            
+          .write(generatePathToImage(filename), function (err) {
+            if (err) throw err;            
+            qrcode.toDataURL('http://techter.pw', { version: 2 }, function (err, url) {
+              if (err) throw err;
+              console.log(url);
+              qrcode.toFile(generatePathToPNG(filename), "url", {
+                color: {
+                  dark: '#000',  // Blue dots
+                  light: '#0000' // Transparent background
+                }
+              }, function (err) {
+                if (err) throw err
+                console.log('done')
+                pdfDocBeforeAddingQRCode.pipe(fs.createWriteStream(generatePathToPDF(filename)));
+                pdfDocBeforeAddingQRCode.image(generatePathToImage(filename), 0, 0, {width: 500});
+                pdfDocBeforeAddingQRCode.image(generatePathToPNG(filename), 170, 110, {width: 200});
+                pdfDocBeforeAddingQRCode.end();
+              })
+            })
+          })
           })
   })
-  .catch(function(error) {
-    console.log("Error accured 53: " + error);
+  // .then(function () {
+  //     //   qrcode.toDataURL('http://techter.pw', { version: 2 }, function (err, url) {
+  //     //     if (err) throw err;
+  //     //     console.log(url);
+  //     //     qrcode.toFile(generatePathToPNG(filename), "url", {
+  //     //       color: {
+  //     //         dark: '#00F',  // Blue dots
+  //     //         light: '#0000' // Transparent background
+  //     //       }
+  //     //     }, function (err) {
+  //     //       if (err) throw err
+  //     //       console.log('done')
+  //     //     })
+  //     //   })
+  //     // })
+  //     // .then(function () {
+  //     //   pdfDocBeforeAddingQRCode.pipe(fs.createWriteStream(generatePathToPDF(filename)));
+  //     //   pdfDocBeforeAddingQRCode.image(generatePathToImage(filename), 0, 0, {width: 500});
+  //     //   pdfDocBeforeAddingQRCode.image("./assets/1514558961080.png", 200, 200, {width: 500});
+  //     //   pdfDocBeforeAddingQRCode.end();
+  //     // })
+  //     // .catch(function (error) {
+  //     //   console.log("Error accured 1: " + error);
+  //     // })
+  // })
+  .catch(function (error) {
+    console.log("Error accured 2: " + error);
   })
-})
-
-locImg(conf.api).then(function (result) {
-  console.log('here');
-  console.log(result);
-}).catch(function(err) {
-  console.log("Error accured: " + err)
-})
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -98,12 +156,22 @@ app.use(function(err, req, res, next) {
 });
 
 function generatePathToImage(filename) {
-  var path = "./asset/" + filename + ".jpeg";
+  var path = "./assets/" + filename + ".jpeg";
   return path;
 }
 
 function generatePathToPDF(filename) {
   var path = "./pdf/" + filename + ".pdf";
+  return path;
+}
+
+function generatePathToPNG(filename) {
+  var path = "./assets/" + filename + ".png";
+  return path;
+}
+
+function generatePathToQRCodeImage(filename) {
+  var path = "./assets/" + filename + "-qrcode.png";
   return path;
 }
 

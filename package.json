@@ -12,11 +12,14 @@
     "ejs": "~2.5.7",
     "express": "~4.15.5",
     "google-maps-image-api": "^1.0.3",
+    "images": "^3.0.1",
     "jimp": "^0.2.28",
+    "mmmagic": "^0.4.6",
     "morgan": "~1.9.0",
+    "pdf2img": "^0.5.0",
     "pdfkit": "^0.8.3",
     "qr-image": "^3.2.0",
-    "qrcode": "^1.0.0",
+    "qrcode": "^1.1.0",
     "request": "^2.83.0",
     "serve-favicon": "~2.4.5"
   }
